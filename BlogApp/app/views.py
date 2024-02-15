@@ -2,7 +2,9 @@ from django.shortcuts import render
 from app.forms import CommentForm, SubscribeForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from app.models import Comments, Post, Tag
+from app.models import Comments, Post, Profile, Tag, WebsiteMeta
+from django.contrib.auth.models import User
+from django.db.models import Count
 
 # Create your views here.
 def index(request):
@@ -12,7 +14,10 @@ def index(request):
     featured_blog = Post.objects.filter(is_featured= True)
     subscribe_form = SubscribeForm()
     subscribe_successful = None
+    website_info = None
 
+    if WebsiteMeta.objects.all().exists():
+        website_info = WebsiteMeta.objects.all()[0]
 
     if featured_blog:
         featured_blog = featured_blog[0]
@@ -25,7 +30,7 @@ def index(request):
             subscribe_successful = 'Subscribed successfully.'
             subscribe_form = SubscribeForm()
             
-    context = {'posts':posts, 'top_posts': top_posts, 'recent_posts':recent_posts, 'subscribe_form':subscribe_form, 'subscribe_successful': subscribe_successful, 'featured_blog':featured_blog}
+    context = {'posts':posts, 'top_posts': top_posts, 'recent_posts':recent_posts,'website_info':website_info, 'subscribe_form':subscribe_form, 'subscribe_successful': subscribe_successful, 'featured_blog':featured_blog}
     return render(request, 'app/index.html', context)
 
 
@@ -76,3 +81,25 @@ def tag_page(request, slug):
 
     context = {'tag':tag, 'top_posts':top_posts, 'recent_posts': recent_posts, 'tags':tags}
     return render(request, 'app/tag.html', context)
+
+
+
+def author_page(request, slug):
+    profile= Profile.objects.get(slug=slug)
+    top_posts = Post.objects.filter(author = profile.user).order_by('-view_count')[0:2]
+    recent_posts = Post.objects.filter(author = profile.user).order_by('-last_updated')[0:2]
+    top_authors= User.objects.annotate(number=Count('post')).order_by('number')
+
+    context = {'profile':profile, 'top_posts':top_posts, 'recent_posts': recent_posts, 'top_authors': top_authors}
+    return render(request, 'app/author.html', context)
+
+
+
+def search_post(request):
+    search_query = ''
+    if request.GET.get('q'):
+        search_query = request.GET.get('q')
+    posts = Post.objects.filter(title__icontains=search_query)
+    print('Search: ', search_query)
+    context = {'posts':posts, 'search_query':search_query}
+    return render(request, 'app/search.html', context)
