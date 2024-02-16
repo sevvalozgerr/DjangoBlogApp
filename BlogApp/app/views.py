@@ -27,6 +27,7 @@ def index(request):
         subscribe_form = SubscribeForm(request.POST)
         if subscribe_form.is_valid():
             subscribe_form.save()
+            request.session['subscribed'] = True
             subscribe_successful = 'Subscribed successfully.'
             subscribe_form = SubscribeForm()
             
@@ -103,3 +104,12 @@ def search_post(request):
     print('Search: ', search_query)
     context = {'posts':posts, 'search_query':search_query}
     return render(request, 'app/search.html', context)
+
+
+def about(request):
+    website_info = None
+
+    if WebsiteMeta.objects.all().exists():
+        website_info = WebsiteMeta.objects.all()[0]
+    context ={'website_info':website_info}
+    return render(request, 'app/about.html', context)
