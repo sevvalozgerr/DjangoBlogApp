@@ -7,10 +7,13 @@
         <div class="logo f-logo">
           <i class="fa-brands fa-blogger"></i>
         </div>
-
-        
-
-
+        {% if form.non_field_error%}
+          {% for error in form.non_field_error%}
+            <div class="field-error">
+              <p>{{error}}</p>
+            </div>
+          {% endfor%}
+        {% endif%}
         <div class="inputs">
           <div>
           <div class="search-bar s-active input">
@@ -31,13 +34,9 @@
           <button class="btn btn-primary rounded" type="submit">
             Login <span class="material-icons"> arrow_right_alt </span>
           </button>
-          <p>Not have an account? <a href="signup.html">Sign up</a></p>
+          <p>Not have an account? <a href="{% url "register" %}">Sign up</a></p>
         </div>
       </center>
     </form>
   
-
-
-
-
     {% endblock content %}

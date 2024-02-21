@@ -1,10 +1,12 @@
-from django.shortcuts import render
-from app.forms import CommentForm, SubscribeForm
+from django.shortcuts import render, redirect
+from app.forms import CommentForm, NewUserForm, SubscribeForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from app.models import Comments, Post, Profile, Tag, WebsiteMeta
 from django.contrib.auth.models import User
 from django.db.models import Count
+from django.contrib.auth import login
+
 
 # Create your views here.
 def index(request):
@@ -113,3 +115,19 @@ def about(request):
         website_info = WebsiteMeta.objects.all()[0]
     context ={'website_info':website_info}
     return render(request, 'app/about.html', context)
+
+
+
+
+def register_user(request):
+    form = NewUserForm()
+    if request.method == "POST":
+        form = NewUserForm(request)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('/')
+    
+    context ={'form':form}
+    return render(request, 'registration/registration.html', context)
+
