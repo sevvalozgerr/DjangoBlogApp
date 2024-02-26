@@ -48,6 +48,11 @@ class Post(models.Model):
     view_count = models.IntegerField(null = True, blank= True)
     is_featured = models.BooleanField(default = False)
     author = models.ForeignKey(User, on_delete = models.CASCADE, null=True, blank= True)
+    bookmarks = models.ManyToManyField(User, related_name="bookmarks", blank=True, default=None)
+    likes = models.ManyToManyField(User, related_name="post_like", blank=True, default=None)
+
+    def number_of_likes(self):
+        return self.likes.count()
 
 class Comments(models.Model):
     content = models.TextField()
